@@ -1,14 +1,16 @@
 // data/gallery.ts
 
 export type GalleryImage = {
-  id: string;                    // unique identifier (e.g. 'jax-dragon-01')
-  src: string;                   // path to image, e.g. '/gallery/jax-dragon-back.jpg'
-  alt: string;                   // descriptive alt text for accessibility + SEO
-  artist: string;                // must exactly match one of the artist names
-  style?: string;                // optional: helps with future filtering
-  description?: string;          // optional: short caption or story
-  date?: string;                 // optional: e.g. '2025-11' for sorting later
-  featured?: boolean;            // optional: mark images to show in hero/featured section
+  id: string;
+  src: string;
+  alt: string;
+  artist: string;
+  style?: string;
+  description?: string;
+  date?: string;
+  featured?: boolean;
+  type?: 'cover-up' | 'regular';
+  beforeSrc?: string;
 };
 
 export const galleryImages: GalleryImage[] = [
@@ -110,6 +112,16 @@ export const galleryImages: GalleryImage[] = [
     description: 'Bright neo-traditional flowers and birds sleeve',
     date: '2025-08',
   },
+  {
+    id: 'riven-cover-01',
+    src: '/after1.png',  // use the AFTER photo as main image
+    alt: 'Before and after cover-up: old faded name transformed into neo-traditional floral piece by Riven Cole',
+    artist: 'Riven Cole',
+    style: 'Neo-Traditional',
+    description: 'Cover-up transformation – old name to vibrant floral design',
+    type: 'cover-up',  // optional tag
+    beforeSrc: '/before1.png',  // we'll use this in the lightbox
+  },
 
   // Silas Crowe
   {
@@ -151,6 +163,4 @@ export const galleryImages: GalleryImage[] = [
     description: 'Curated ear constellation with custom jewelry',
     date: '2025-09',
   },
-
-  // Add more images here – aim for 12–30 total to start
 ];
