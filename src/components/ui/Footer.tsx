@@ -5,7 +5,7 @@ import { Instagram } from 'lucide-react'; // Assuming lucide-react is installed
 export default function Footer() {
   return (
     <footer className="bg-gray-950 border-t border-amber-900/30 text-gray-400">
-      {/* Top Divider - subtle mountain/metal line */}
+      {/* Top Divider */}
       <div className="h-1 bg-gradient-to-r from-transparent via-amber-900/50 to-transparent" />
 
       <div className="max-w-7xl mx-auto px-6 py-12 md:py-16">
@@ -64,7 +64,7 @@ export default function Footer() {
             </h4>
             <div className="flex justify-center md:justify-start gap-6 mb-6">
               <a
-                href="https://instagram.com/yourstudiohandle"
+                href="https://instagram.com/inkofthemountains" // ← replace with your real IG
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-400 hover:text-amber-300 transition-colors"
@@ -72,24 +72,33 @@ export default function Footer() {
               >
                 <Instagram size={28} />
               </a>
-              {/* Add more socials if needed */}
-              {/* <a href="#" className="text-gray-400 hover:text-amber-300"><Facebook size={28} /></a> */}
             </div>
 
             <p className="text-sm">
-              Email: bookings@yourstudio.com<br />
+              Email: bookings@inkofthemountains.com<br />
               Walk-ins welcome • Appointments preferred
             </p>
           </div>
         </div>
 
-        {/* Bottom Copyright */}
+        {/* Bottom Copyright + Credit */}
         <div className="mt-12 pt-8 border-t border-gray-800 text-center text-sm text-gray-600">
           <p>
             © {new Date().getFullYear()} Ink of the Mountains Tattoo Studio • Beckley, West Virginia
           </p>
           <p className="mt-2">
             All artwork © respective artists • No reproduction without permission
+          </p>
+          <p className="mt-4 text-gray-500">
+            Website made by{' '}
+            <a
+              href="https://newmanswebdev.com" // ← replace with your actual website URL
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-amber-400 hover:text-amber-300 transition-colors"
+            >
+              Newman's Web Dev
+            </a>
           </p>
         </div>
       </div>
