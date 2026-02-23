@@ -122,7 +122,7 @@ export default function ServicesPage() {
           SERVICES
         </h1>
         <p className="text-xl md:text-2xl max-w-4xl mx-auto text-gray-400">
-          Premium custom tattoos and professional piercings in Teays Valley, West Virginia.
+          Premium custom tattoos and professional piercings in Beckley, West Virginia.
           <br className="hidden md:block" />
           Every piece is hand-crafted with respect for the craft and your story.
         </p>

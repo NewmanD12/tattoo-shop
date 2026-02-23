@@ -14,8 +14,8 @@ const newRocker = New_Rocker({
 });
 
 export const metadata: Metadata = {
-  title: "Ink of the Mountains | Teays Valley Tattoo Studio",
-  description: "Custom tattoos in Teays Valley, West Virginia – Japanese irezumi, realism, and more.",
+  title: "Ink of the Mountains | Beckley Tattoo Studio",
+  description: "Custom tattoos in Beckley, West Virginia – Japanese irezumi, realism, and more.",
 };
 
 export default function RootLayout({

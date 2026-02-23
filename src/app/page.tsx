@@ -36,7 +36,7 @@ export default function Home() {
 
           <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
             <Link
-              href="#gallery"  // or /gallery later
+              href="/gallery"  // or /gallery later
               className="bg-gradient-to-r from-amber-700 to-amber-900 hover:from-amber-600 hover:to-amber-800 text-white font-bold py-5 px-12 rounded-full text-lg transition transform hover:scale-105 shadow-xl shadow-black/50"
             >
               See the Work

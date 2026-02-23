@@ -3,7 +3,7 @@ export const artists = [
     id: "1",
     name: "Dakota Black",
     handle: "@dakotaink",
-    bio: "Specializing in neo-traditional and realism. Teays Valley's go-to for bold color pieces.",
+    bio: "Specializing in neo-traditional and realism. Beckley's go-to for bold color pieces.",
     photo: "/assets/artists/dakota.jpg",
     specialties: ["neo-traditional", "realism", "color bombs"],
     instagram: "https://instagram.com/dakotaink",

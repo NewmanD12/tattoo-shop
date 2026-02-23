@@ -12,7 +12,7 @@ export default function Navbar() {
     { href: '/gallery', label: 'Gallery' },
     { href: '/artists', label: 'Artists' },
     { href: '/services', label: 'Services' },
-    { href: '#contact', label: 'Contact' },
+    { href: '/contact', label: 'Contact' },
   ];
 
   return (
@@ -24,8 +24,6 @@ export default function Navbar() {
             <span className="text-2xl md:text-3xl font-black tracking-tight text-white">
               <span className="text-amber-500">INK</span>MOUNTAIN
             </span>
-            {/* Optional small tagline or icon */}
-            {/* <span className="text-xs text-gray-500 hidden md:block">Teays Valley, WV</span> */}
           </Link>
 
           {/* Desktop Menu */}
