@@ -4,7 +4,7 @@ import Link from 'next/link';
 
 const team = [
   {
-    name: 'Jax "Mountain" Harlan',
+    name: 'Jax Harlan',
     role: 'Tattoo Artist',
     specialties: ['Japanese Irezumi', 'Blackwork', 'Large-Scale Realism'],
     bio: 'Born and raised in the hills of West Virginia, Jax brings raw mountain energy to every piece. Specializes in massive back and chest work that tells epic stories. 12+ years inking.',

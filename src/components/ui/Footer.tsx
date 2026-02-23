@@ -18,7 +18,7 @@ export default function Footer() {
               </h3>
             </Link>
             <p className="text-sm md:text-base text-gray-500">
-              Custom tattoos & piercing in Teays Valley, West Virginia.<br />
+              Custom tattoos & piercing in Beckley, West Virginia.<br />
               Where stories meet skin under Appalachian skies.
             </p>
           </div>
@@ -86,7 +86,7 @@ export default function Footer() {
         {/* Bottom Copyright */}
         <div className="mt-12 pt-8 border-t border-gray-800 text-center text-sm text-gray-600">
           <p>
-            © {new Date().getFullYear()} Ink of the Mountains Tattoo Studio • Teays Valley, West Virginia
+            © {new Date().getFullYear()} Ink of the Mountains Tattoo Studio • Beckley, West Virginia
           </p>
           <p className="mt-2">
             All artwork © respective artists • No reproduction without permission
