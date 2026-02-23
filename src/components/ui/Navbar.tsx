@@ -11,7 +11,7 @@ export default function Navbar() {
   const navLinks = [
     { href: '/gallery', label: 'Gallery' },
     { href: '/artists', label: 'Artists' },
-    { href: '#services', label: 'Services' },
+    { href: '/services', label: 'Services' },
     { href: '#contact', label: 'Contact' },
   ];
 
@@ -29,7 +29,7 @@ export default function Navbar() {
           </Link>
 
           {/* Desktop Menu */}
-          <div className="hidden md:flex items-center gap-10">
+          <div className="hidden text-2xl md:flex items-center gap-10">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
@@ -67,7 +67,7 @@ export default function Navbar() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="text-lg text-gray-300 hover:text-amber-400 transition-colors"
+                className="text-xl mx-auto text-gray-300 hover:text-amber-400 transition-colors"
                 onClick={() => setIsOpen(false)}
               >
                 {link.label}
