@@ -1,12 +1,11 @@
-// app/gallery/page.tsx
 'use client';
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import Lightbox from 'yet-another-react-lightbox';
 import 'yet-another-react-lightbox/styles.css';
-import { ReactCompareSlider, ReactCompareSliderImage } from 'react-compare-slider'; // ← this is the slider
+import { ReactCompareSlider, ReactCompareSliderImage } from 'react-compare-slider';
+
 import { galleryImages, type GalleryImage } from '@/data/gallery';
 
 const artists = [
@@ -17,29 +16,52 @@ const artists = [
   { name: 'Luna Voss', photo: '/luna.jpg' },
 ];
 
+type CombinedImage = GalleryImage | {
+  id: string;
+  src: string;
+  alt: string;
+  artist: string;
+  style?: string;
+  description?: string;
+  permalink?: string;
+  timestamp: string;
+  type: 'instagram';
+};
+
 export default function GalleryPage() {
   const [activeArtist, setActiveArtist] = useState('All');
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [coverUpModalImg, setCoverUpModalImg] = useState<GalleryImage | null>(null);
+  const [allImages, setAllImages] = useState<CombinedImage[]>(galleryImages);
 
-  const filteredImages = galleryImages.filter(
-    (img) => activeArtist === 'All' || img.artist === activeArtist
+  // Load Instagram posts
+  useEffect(() => {
+    fetch('/api/instagram-posts')
+      .then((res) => res.json())
+      .then((igPosts: any[]) => {
+        setAllImages([...galleryImages, ...igPosts]);
+      })
+      .catch((err) => {
+        console.error('Failed to load Instagram posts:', err);
+      });
+  }, []);
+
+  const filteredImages = allImages.filter((img) =>
+    activeArtist === 'All' || img.artist === activeArtist
   );
 
-  // Slides for normal lightbox (non-cover-ups)
   const lightboxSlides = filteredImages
     .filter((img) => img.type !== 'cover-up')
     .map((img) => ({
       src: img.src,
-      alt: img.alt,
+      alt: img.alt || '',
       title: `${img.artist}${img.style ? ` • ${img.style}` : ''}`,
-      description: img.description,
+      description: img.description || '',
     }));
 
-  // Handle image click: cover-up → slider modal, regular → lightbox
-  const handleImageClick = (img: GalleryImage, index: number) => {
+  const handleImageClick = (img: CombinedImage, index: number) => {
     if (img.type === 'cover-up' && 'beforeSrc' in img && img.beforeSrc) {
-      setCoverUpModalImg(img);
+      setCoverUpModalImg(img as GalleryImage);
     } else {
       setLightboxIndex(index);
     }
@@ -50,7 +72,6 @@ export default function GalleryPage() {
       {/* Hero / Filter Section */}
       <section className="relative py-32 md:py-48 px-6 md:px-12 lg:px-24">
         <div className="absolute inset-0 bg-gradient-to-b from-gray-950 via-gray-950/80 to-gray-950 pointer-events-none" />
-
         <div className="relative z-10 max-w-7xl mx-auto">
           <h1 className="text-6xl md:text-8xl lg:text-9xl font-[var(--font-new-rocker)] text-amber-300 tracking-[0.08em] mb-16 text-center drop-shadow-2xl">
             GALLERY
@@ -81,7 +102,6 @@ export default function GalleryPage() {
                   className="object-cover transition-transform duration-1000 group-hover:scale-110"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-
                 <div className="absolute inset-x-0 bottom-0 p-6">
                   <h3
                     className={`
@@ -92,7 +112,6 @@ export default function GalleryPage() {
                     {artist.name}
                   </h3>
                 </div>
-
                 <div
                   className={`
                     absolute inset-0 rounded-2xl border-2 border-amber-500/0 transition-all duration-700 pointer-events-none
@@ -116,12 +135,19 @@ export default function GalleryPage() {
                 onClick={() => handleImageClick(img, index)}
               >
                 <div className="relative aspect-[3/4] md:aspect-[4/5]">
-                  <Image
-                    src={img.src}
-                    alt={img.alt}
-                    fill
-                    className="object-cover transition-all duration-1000 group-hover:scale-110 group-hover:rotate-1"
-                  />
+                  {img.src ? (
+                    <Image
+                      src={img.src}
+                      alt={img.alt || 'Tattoo work'}
+                      fill
+                      className="object-cover transition-all duration-1000 group-hover:scale-110 group-hover:rotate-1"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gray-900 flex items-center justify-center">
+                      <p className="text-gray-500">Image unavailable</p>
+                    </div>
+                  )}
                 </div>
 
                 {/* Overlay */}
@@ -130,6 +156,12 @@ export default function GalleryPage() {
                     {img.artist}
                   </p>
                   {img.style && <p className="text-gray-400 text-sm">{img.style}</p>}
+
+                  {img.type === 'instagram' && (
+                    <span className="inline-block mt-2 px-3 py-1 bg-blue-600/80 text-white text-xs rounded-full">
+                      Instagram
+                    </span>
+                  )}
                   {img.type === 'cover-up' && (
                     <span className="inline-block mt-2 px-3 py-1 bg-amber-600/80 text-white text-xs rounded-full">
                       Cover-Up
@@ -139,16 +171,10 @@ export default function GalleryPage() {
               </div>
             ))}
           </div>
-
-          {filteredImages.length === 0 && (
-            <div className="text-center py-32 text-gray-500 text-xl">
-              No artwork uploaded for this artist yet.
-            </div>
-          )}
         </div>
       </section>
 
-      {/* Normal Lightbox for regular images */}
+      {/* Normal Lightbox */}
       <Lightbox
         open={lightboxIndex !== null}
         close={() => setLightboxIndex(null)}
@@ -158,25 +184,22 @@ export default function GalleryPage() {
         carousel={{ finite: false }}
       />
 
-      {/* Cover-Up Slider Modal (draggable before/after) */}
+      {/* Cover-Up Slider Modal */}
       {coverUpModalImg && (
         <div
           className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center backdrop-blur-sm"
           onClick={() => setCoverUpModalImg(null)}
         >
           <div className="relative max-w-5xl w-full p-6 md:p-12" onClick={(e) => e.stopPropagation()}>
-            {/* Close button */}
             <button
               className="absolute top-4 right-4 text-white text-5xl hover:text-amber-300 transition-colors"
               onClick={() => setCoverUpModalImg(null)}
             >
               ×
             </button>
-
             <h3 className="text-3xl md:text-4xl font-[var(--font-new-rocker)] text-amber-300 mb-8 text-center">
               Cover-Up Transformation
             </h3>
-
             <ReactCompareSlider
               itemOne={
                 <ReactCompareSliderImage
@@ -196,7 +219,7 @@ export default function GalleryPage() {
                   style={{ objectFit: 'cover' }}
                 />
               }
-              position={50} // Starts centered
+              position={50}
               handle={
                 <div className="w-14 h-14 bg-amber-500 rounded-full flex items-center justify-center shadow-xl border-4 border-white">
                   <span className="text-black text-2xl font-bold">↔</span>
@@ -204,8 +227,6 @@ export default function GalleryPage() {
               }
               style={{ height: '70vh', width: '100%' }}
             />
-
-            {/* Caption */}
             <p className="text-center mt-8 text-gray-300 text-xl">
               {coverUpModalImg.description}
             </p>

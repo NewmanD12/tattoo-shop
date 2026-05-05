@@ -1,20 +1,21 @@
 import { NextResponse } from 'next/server';
+import { addInstagramPost } from '@/data/instagram';
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    console.log('New Instagram Post Received:', body);
 
-    // For now, just log it (we'll improve this later)
-    // You can also save to localStorage, a JSON file, or a simple array in memory
+    const savedPost = addInstagramPost(body);
 
-    return NextResponse.json({ 
-      success: true, 
-      message: 'Post received from Instagram',
-      postId: body.id 
+    console.log('✅ New Instagram post added:', savedPost.id);
+
+    return NextResponse.json({
+      success: true,
+      message: 'Post added to gallery',
+      postId: savedPost.id,
     });
   } catch (error) {
     console.error('Webhook error:', error);
-    return NextResponse.json({ error: 'Failed to process' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to process post' }, { status: 500 });
   }
 }
