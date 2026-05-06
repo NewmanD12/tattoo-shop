@@ -1,4 +1,19 @@
-// data/instagram.ts
+// src/data/instagram.ts
+import { createClient } from 'redis';
+
+const redis = createClient({
+  url: process.env.KV_URL,
+});
+
+redis.on('error', (err) => console.error('Redis Client Error', err));
+
+async function getClient() {
+  if (!redis.isOpen) {
+    await redis.connect();
+  }
+  return redis;
+}
+
 export type InstagramPost = {
   id: string;
   src: string;
@@ -11,21 +26,10 @@ export type InstagramPost = {
   type: 'instagram';
 };
 
-import fs from 'fs';
-import path from 'path';
+const KEY = 'instagram-posts';
 
-const dataDir = path.join(process.cwd(), 'data');
-const filePath = path.join(dataDir, 'instagram-posts.json');
-
-function ensureStorage() {
-  if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
-  if (!fs.existsSync(filePath)) fs.writeFileSync(filePath, '[]');
-}
-
-export function addInstagramPost(rawPost: any): InstagramPost {
-  ensureStorage();
-
-  const posts: InstagramPost[] = JSON.parse(fs.readFileSync(filePath, 'utf8') || '[]');
+export async function addInstagramPost(rawPost: any): Promise<InstagramPost> {
+  const client = await getClient();
 
   const newPost: InstagramPost = {
     id: rawPost.id || `ig-${Date.now()}`,
@@ -39,20 +43,26 @@ export function addInstagramPost(rawPost: any): InstagramPost {
     type: 'instagram',
   };
 
-  if (newPost.src) {
-    posts.unshift(newPost);
-    fs.writeFileSync(filePath, JSON.stringify(posts, null, 2));
+  if (!newPost.src) {
+    console.warn('Skipped post with no image');
+    return newPost;
   }
+
+  const posts: InstagramPost[] = JSON.parse((await client.get(KEY)) || '[]');
+  posts.unshift(newPost);
+
+  await client.set(KEY, JSON.stringify(posts));
 
   return newPost;
 }
 
-export function getInstagramPosts(): InstagramPost[] {
-  ensureStorage();
+export async function getInstagramPosts(): Promise<InstagramPost[]> {
   try {
-    const data = fs.readFileSync(filePath, 'utf8');
-    return JSON.parse(data);
-  } catch {
+    const client = await getClient();
+    const data = await client.get(KEY);
+    return data ? JSON.parse(data) : [];
+  } catch (error) {
+    console.error('Redis Error:', error);
     return [];
   }
 }
