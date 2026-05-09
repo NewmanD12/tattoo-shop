@@ -25,7 +25,7 @@ export async function POST(req: Request) {
 
     let finalMediaUrl = body.media_url || body.image_url;
 
-    // Re-host image permanently on Vercel Blob
+    // Re-host image to Vercel Blob
     if (finalMediaUrl) {
       try {
         const imageRes = await fetch(finalMediaUrl);
@@ -37,8 +37,19 @@ export async function POST(req: Request) {
           finalMediaUrl = url;
         }
       } catch (err) {
-        console.error('Failed to re-host image:', err);
+        console.error('Blob upload failed:', err);
       }
+    }
+
+    // Safer timestamp handling
+    let postTimestamp: Date;
+    try {
+      postTimestamp = body.timestamp ? new Date(body.timestamp) : new Date();
+      if (isNaN(postTimestamp.getTime())) {
+        postTimestamp = new Date();
+      }
+    } catch {
+      postTimestamp = new Date();
     }
 
     await db.insert(instagramPosts).values({
@@ -46,10 +57,10 @@ export async function POST(req: Request) {
       mediaUrl: finalMediaUrl,
       caption: body.caption || null,
       permalink: body.permalink,
-      timestamp: body.timestamp ? new Date(body.timestamp) : new Date(),
+      timestamp: postTimestamp,
     });
 
-    console.log('✅ Post saved successfully:', body.id);
+    console.log('✅ Post saved:', body.id);
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
