@@ -16,52 +16,39 @@ const artists = [
   { name: 'Luna Voss', photo: '/luna.jpg' },
 ];
 
-type CombinedImage = GalleryImage | {
-  id: string;
-  src: string;
-  alt: string;
-  artist: string;
-  style?: string;
-  description?: string;
-  permalink?: string;
-  timestamp: string;
-  type: 'instagram';
-};
-
 export default function GalleryPage() {
   const [activeArtist, setActiveArtist] = useState('All');
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [coverUpModalImg, setCoverUpModalImg] = useState<GalleryImage | null>(null);
-  const [allImages, setAllImages] = useState<CombinedImage[]>(galleryImages);
+  const [allImages, setAllImages] = useState<any[]>(galleryImages);
 
-  // Load Instagram posts
+  // Load Instagram posts from database
   useEffect(() => {
     fetch('/api/instagram-posts')
       .then((res) => res.json())
       .then((igPosts: any[]) => {
         setAllImages([...galleryImages, ...igPosts]);
       })
-      .catch((err) => {
-        console.error('Failed to load Instagram posts:', err);
-      });
+      .catch((err) => console.error('Failed to load Instagram posts:', err));
   }, []);
 
-  const filteredImages = allImages.filter((img) =>
-    activeArtist === 'All' || img.artist === activeArtist
-  );
+  const filteredImages = allImages.filter((img) => {
+    if (activeArtist === 'All') return true;
+    return img.artist === activeArtist;
+  });
 
   const lightboxSlides = filteredImages
     .filter((img) => img.type !== 'cover-up')
     .map((img) => ({
-      src: img.src,
-      alt: img.alt || '',
-      title: `${img.artist}${img.style ? ` • ${img.style}` : ''}`,
-      description: img.description || '',
+      src: img.mediaUrl || img.src,
+      alt: img.caption || img.alt || '',
+      title: img.artist || 'Instagram',
+      description: img.caption || img.description || '',
     }));
 
-  const handleImageClick = (img: CombinedImage, index: number) => {
-    if (img.type === 'cover-up' && 'beforeSrc' in img && img.beforeSrc) {
-      setCoverUpModalImg(img as GalleryImage);
+  const handleImageClick = (img: any, index: number) => {
+    if (img.type === 'cover-up' && img.beforeSrc) {
+      setCoverUpModalImg(img);
     } else {
       setLightboxIndex(index);
     }
@@ -86,10 +73,9 @@ export default function GalleryPage() {
                 className={`
                   group relative aspect-[3/4] rounded-2xl overflow-hidden
                   border-2 border-transparent transition-all duration-700
-                  ${
-                    activeArtist === artist.name
-                      ? 'border-amber-500/70 shadow-2xl shadow-amber-900/60 scale-[1.04] z-10'
-                      : 'hover:border-amber-500/30 hover:scale-[1.02] hover:shadow-xl hover:shadow-amber-950/40'
+                  ${activeArtist === artist.name
+                    ? 'border-amber-500/70 shadow-2xl shadow-amber-900/60 scale-[1.04] z-10'
+                    : 'hover:border-amber-500/30 hover:scale-[1.02] hover:shadow-xl hover:shadow-amber-950/40'
                   }
                 `}
                 whileHover={{ scale: 1.04, rotate: 1 }}
@@ -103,21 +89,10 @@ export default function GalleryPage() {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
                 <div className="absolute inset-x-0 bottom-0 p-6">
-                  <h3
-                    className={`
-                      text-xl md:text-2xl font-[var(--font-new-rocker)] tracking-wider transition-colors
-                      ${activeArtist === artist.name ? 'text-amber-300' : 'text-white group-hover:text-amber-300'}
-                    `}
-                  >
+                  <h3 className={`text-xl md:text-2xl font-[var(--font-new-rocker)] tracking-wider transition-colors ${activeArtist === artist.name ? 'text-amber-300' : 'text-white group-hover:text-amber-300'}`}>
                     {artist.name}
                   </h3>
                 </div>
-                <div
-                  className={`
-                    absolute inset-0 rounded-2xl border-2 border-amber-500/0 transition-all duration-700 pointer-events-none
-                    ${activeArtist === artist.name ? 'border-amber-500/60 shadow-[0_0_40px_8px] shadow-amber-600/30' : ''}
-                  `}
-                />
               </motion.button>
             ))}
           </div>
@@ -135,10 +110,10 @@ export default function GalleryPage() {
                 onClick={() => handleImageClick(img, index)}
               >
                 <div className="relative aspect-[3/4] md:aspect-[4/5]">
-                  {img.src ? (
+                  {(img.mediaUrl || img.src) ? (
                     <Image
-                      src={img.src}
-                      alt={img.alt || 'Tattoo work'}
+                      src={img.mediaUrl || img.src}
+                      alt={img.caption || img.alt || 'Tattoo work'}
                       fill
                       className="object-cover transition-all duration-1000 group-hover:scale-110 group-hover:rotate-1"
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
@@ -150,10 +125,9 @@ export default function GalleryPage() {
                   )}
                 </div>
 
-                {/* Overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-end p-6">
                   <p className="text-amber-300 font-medium text-lg mb-1">
-                    {img.artist}
+                    {img.artist || 'All'}
                   </p>
                   {img.style && <p className="text-gray-400 text-sm">{img.style}</p>}
 
