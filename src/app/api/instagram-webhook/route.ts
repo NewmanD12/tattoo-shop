@@ -8,7 +8,7 @@ import { eq } from 'drizzle-orm';
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    console.log('Received body:', body);   // ← important for debugging
+    console.log('📥 Raw body from Zapier:', body);
 
     if (!body?.id) {
       return NextResponse.json({ error: 'Missing post ID' }, { status: 400 });
@@ -20,17 +20,26 @@ export async function POST(req: Request) {
     }
 
     let finalMediaUrl = body.media_url || body.image_url;
+    console.log('Original media_url:', finalMediaUrl);
 
+    // Re-host to Vercel Blob
     if (finalMediaUrl) {
       try {
+        console.log('Attempting to download and re-host image...');
         const imageRes = await fetch(finalMediaUrl);
-        if (imageRes.ok) {
-          const blob = await imageRes.blob();
-          const { url } = await put(`instagram/${body.id}.jpg`, blob, { access: 'public' });
-          finalMediaUrl = url;
-        }
-      } catch (e) {
-        console.error('Blob error:', e);
+        
+        if (!imageRes.ok) throw new Error(`Fetch failed: ${imageRes.status}`);
+
+        const blob = await imageRes.blob();
+        const { url } = await put(`instagram/${body.id}.jpg`, blob, { 
+          access: 'public' 
+        });
+
+        finalMediaUrl = url;
+        console.log('✅ Successfully re-hosted to Vercel Blob:', url);
+      } catch (err) {
+        console.error('❌ Blob re-host failed:', err);
+        // Keep original Instagram URL as fallback
       }
     }
 
@@ -42,11 +51,11 @@ export async function POST(req: Request) {
       timestamp: body.timestamp ? new Date(body.timestamp) : new Date(),
     });
 
-    console.log('✅ Successfully saved post:', body.id);
+    console.log('✅ Post fully saved to DB');
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, mediaUrl: finalMediaUrl });
   } catch (error: any) {
-    console.error('Webhook full error:', error);
+    console.error('Webhook Error:', error);
     return NextResponse.json({ error: 'Failed', details: error.message }, { status: 500 });
   }
 }

@@ -22,41 +22,24 @@ export default function GalleryPage() {
   const [coverUpModalImg, setCoverUpModalImg] = useState<GalleryImage | null>(null);
   const [allImages, setAllImages] = useState<any[]>(galleryImages);
 
-  // Load Instagram posts from database
+  // Load Instagram posts
   useEffect(() => {
     fetch('/api/instagram-posts')
-      .then((res) => res.json())
-      .then((igPosts: any[]) => {
-        setAllImages([...galleryImages, ...igPosts]);
+      .then(res => res.json())
+      .then(posts => {
+        console.log("✅ Loaded from DB:", posts);
+        setAllImages([...galleryImages, ...posts]);
       })
-      .catch((err) => console.error('Failed to load Instagram posts:', err));
+      .catch(err => console.error(err));
   }, []);
 
-  const filteredImages = allImages.filter((img) => {
-    if (activeArtist === 'All') return true;
-    return img.artist === activeArtist;
-  });
-
-  const lightboxSlides = filteredImages
-    .filter((img) => img.type !== 'cover-up')
-    .map((img) => ({
-      src: img.mediaUrl || img.src,
-      alt: img.caption || img.alt || '',
-      title: img.artist || 'Instagram',
-      description: img.caption || img.description || '',
-    }));
-
-  const handleImageClick = (img: any, index: number) => {
-    if (img.type === 'cover-up' && img.beforeSrc) {
-      setCoverUpModalImg(img);
-    } else {
-      setLightboxIndex(index);
-    }
-  };
+  const filteredImages = allImages.filter(img => 
+    activeArtist === 'All' || img.artist === activeArtist
+  );
 
   return (
     <main className="min-h-screen bg-gray-950 text-gray-100 overflow-x-hidden">
-      {/* Hero / Filter Section */}
+      {/* Hero Section */}
       <section className="relative py-32 md:py-48 px-6 md:px-12 lg:px-24">
         <div className="absolute inset-0 bg-gradient-to-b from-gray-950 via-gray-950/80 to-gray-950 pointer-events-none" />
         <div className="relative z-10 max-w-7xl mx-auto">
@@ -64,32 +47,21 @@ export default function GalleryPage() {
             GALLERY
           </h1>
 
-          {/* Artist Filter Cards */}
+          {/* Artist Filters */}
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 md:gap-8 lg:gap-10 mb-24">
             {artists.map((artist) => (
               <motion.button
                 key={artist.name}
                 onClick={() => setActiveArtist(artist.name)}
-                className={`
-                  group relative aspect-[3/4] rounded-2xl overflow-hidden
-                  border-2 border-transparent transition-all duration-700
-                  ${activeArtist === artist.name
-                    ? 'border-amber-500/70 shadow-2xl shadow-amber-900/60 scale-[1.04] z-10'
-                    : 'hover:border-amber-500/30 hover:scale-[1.02] hover:shadow-xl hover:shadow-amber-950/40'
-                  }
-                `}
+                className={`group relative aspect-[3/4] rounded-2xl overflow-hidden border-2 border-transparent transition-all duration-700 ${
+                  activeArtist === artist.name ? 'border-amber-500/70 shadow-2xl shadow-amber-900/60 scale-[1.04] z-10' : 'hover:border-amber-500/30 hover:scale-[1.02]'
+                }`}
                 whileHover={{ scale: 1.04, rotate: 1 }}
-                transition={{ type: 'spring', stiffness: 300, damping: 20 }}
               >
-                <Image
-                  src={artist.photo}
-                  alt={artist.name}
-                  fill
-                  className="object-cover transition-transform duration-1000 group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-                <div className="absolute inset-x-0 bottom-0 p-6">
-                  <h3 className={`text-xl md:text-2xl font-[var(--font-new-rocker)] tracking-wider transition-colors ${activeArtist === artist.name ? 'text-amber-300' : 'text-white group-hover:text-amber-300'}`}>
+                <Image src={artist.photo} alt={artist.name} fill className="object-cover group-hover:scale-110 transition-transform" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+                <div className="absolute bottom-0 p-6 w-full">
+                  <h3 className={`text-xl md:text-2xl font-[var(--font-new-rocker)] ${activeArtist === artist.name ? 'text-amber-300' : 'text-white'}`}>
                     {artist.name}
                   </h3>
                 </div>
@@ -107,106 +79,26 @@ export default function GalleryPage() {
               <div
                 key={img.id}
                 className="break-inside-avoid group relative rounded-2xl overflow-hidden shadow-2xl shadow-black/60 hover:shadow-amber-900/40 transition-shadow duration-500 cursor-pointer"
-                onClick={() => handleImageClick(img, index)}
+                onClick={() => console.log('Clicked:', img)} // temporary
               >
                 <div className="relative aspect-[3/4] md:aspect-[4/5]">
-                  {(img.mediaUrl || img.src) ? (
-                    <Image
-                      src={img.mediaUrl || img.src}
-                      alt={img.caption || img.alt || 'Tattoo work'}
-                      fill
-                      className="object-cover transition-all duration-1000 group-hover:scale-110 group-hover:rotate-1"
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-gray-900 flex items-center justify-center">
-                      <p className="text-gray-500">Image unavailable</p>
-                    </div>
-                  )}
+                  <Image
+                    src={img.media_url || img.mediaUrl || img.src}
+                    alt={img.caption || 'Tattoo'}
+                    fill
+                    className="object-cover transition-all duration-1000 group-hover:scale-110"
+                  />
                 </div>
-
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-end p-6">
-                  <p className="text-amber-300 font-medium text-lg mb-1">
-                    {img.artist || 'All'}
-                  </p>
-                  {img.style && <p className="text-gray-400 text-sm">{img.style}</p>}
-
-                  {img.type === 'instagram' && (
-                    <span className="inline-block mt-2 px-3 py-1 bg-blue-600/80 text-white text-xs rounded-full">
-                      Instagram
-                    </span>
-                  )}
-                  {img.type === 'cover-up' && (
-                    <span className="inline-block mt-2 px-3 py-1 bg-amber-600/80 text-white text-xs rounded-full">
-                      Cover-Up
-                    </span>
-                  )}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 to-transparent opacity-0 group-hover:opacity-100 transition-opacity p-6 flex flex-col justify-end">
+                  <p className="text-amber-300 font-medium">{img.artist || 'All'}</p>
+                  {img.caption && <p className="text-sm text-gray-300 line-clamp-2 mt-1">{img.caption}</p>}
+                  <span className="inline-block mt-3 px-3 py-1 bg-blue-600/80 text-xs rounded-full w-fit">Instagram</span>
                 </div>
               </div>
             ))}
           </div>
         </div>
       </section>
-
-      {/* Normal Lightbox */}
-      <Lightbox
-        open={lightboxIndex !== null}
-        close={() => setLightboxIndex(null)}
-        slides={lightboxSlides}
-        index={lightboxIndex ?? 0}
-        controller={{ closeOnBackdropClick: true }}
-        carousel={{ finite: false }}
-      />
-
-      {/* Cover-Up Slider Modal */}
-      {coverUpModalImg && (
-        <div
-          className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center backdrop-blur-sm"
-          onClick={() => setCoverUpModalImg(null)}
-        >
-          <div className="relative max-w-5xl w-full p-6 md:p-12" onClick={(e) => e.stopPropagation()}>
-            <button
-              className="absolute top-4 right-4 text-white text-5xl hover:text-amber-300 transition-colors"
-              onClick={() => setCoverUpModalImg(null)}
-            >
-              ×
-            </button>
-            <h3 className="text-3xl md:text-4xl font-[var(--font-new-rocker)] text-amber-300 mb-8 text-center">
-              Cover-Up Transformation
-            </h3>
-            <ReactCompareSlider
-              itemOne={
-                <ReactCompareSliderImage
-                  src={coverUpModalImg.beforeSrc || ''}
-                  alt="Before"
-                  width={1200}
-                  height={1200}
-                  style={{ objectFit: 'cover' }}
-                />
-              }
-              itemTwo={
-                <ReactCompareSliderImage
-                  src={coverUpModalImg.src}
-                  alt="After"
-                  width={1200}
-                  height={1200}
-                  style={{ objectFit: 'cover' }}
-                />
-              }
-              position={50}
-              handle={
-                <div className="w-14 h-14 bg-amber-500 rounded-full flex items-center justify-center shadow-xl border-4 border-white">
-                  <span className="text-black text-2xl font-bold">↔</span>
-                </div>
-              }
-              style={{ height: '70vh', width: '100%' }}
-            />
-            <p className="text-center mt-8 text-gray-300 text-xl">
-              {coverUpModalImg.description}
-            </p>
-          </div>
-        </div>
-      )}
     </main>
   );
 }
